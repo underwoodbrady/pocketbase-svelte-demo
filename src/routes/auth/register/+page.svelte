@@ -11,7 +11,7 @@
     async function login() {
         try{
             await pb.collection("users").authWithPassword(username, password);
-            window.location.replace(`http://${window.location.host}/home`);
+            window.location.assign(`http://${window.location.host}/home`);
         }catch(err){
             console.error(err);
             alert(err);

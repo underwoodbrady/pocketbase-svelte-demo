@@ -3,7 +3,6 @@
 	import Post from '$lib/Post.svelte';
 	import UserFollow from '$lib/UserFollow.svelte';
 	import { onDestroy, onMount } from 'svelte';
-	import Dropdown from '$lib/Dropdown.svelte';
 
 	let creatingPost: boolean = true;
 	let postText: string;
@@ -11,6 +10,8 @@
 
 	let userList: any = [];
 	let postList: any = [];
+	let followIds: any = [];
+	let followList: any = [];
 
 	async function getRecentUsers() {
 		userList = await (
@@ -24,9 +25,20 @@
 		postList = await (
 			await pb.collection('posts').getList(1, 50, {
 				sort: '-created',
-				expand: 'author,comments',
+				expand: 'author,comments'
 			})
 		).items;
+	}
+
+	async function getFollowing() {
+		if ($currentUser == null) return;
+
+		let user = await pb.collection('users').getOne($currentUser.id, {
+			expand: 'following'
+		});
+
+		followIds = user.following;
+		followList = user.expand.following || [];
 	}
 
 	async function createPost() {
@@ -70,17 +82,46 @@
 			text: comment,
 			author: $currentUser.id,
 			username: $currentUser.username
-		}
+		};
 
-		let newComment = await pb.collection('comments').create(commentData); 
+		let newComment = await pb.collection('comments').create(commentData);
 
 		let comments = [...post.comments, newComment.id];
 
 		const updateData = {
-			comments: comments,
+			comments: comments
 		};
 
 		await pb.collection('posts').update(id, updateData);
+	}
+
+	async function followUser(id: string) {
+		//follow user
+		if ($currentUser == null) return;
+
+		let user = await pb.collection('users').getOne(id);
+
+		if (followIds.includes(user.id)) return;
+
+		let following = [...followIds, user.id];
+
+		const data = {
+			following: following
+		};
+
+		await pb.collection('users').update($currentUser.id, data);
+
+		getFollowing();
+		
+		//other user receives follow (CURRENTLY NOT PROTECTED AT ALL, super dumb and not safe***)
+
+		let followers = [...user.followers, $currentUser.id]
+
+		const receiveData = {
+			followers: followers
+		}
+
+		await pb.collection('users').update(user.id, receiveData)
 	}
 
 	let unsubscribe: () => void;
@@ -88,6 +129,7 @@
 	onMount(async () => {
 		getRecentUsers();
 		getRecentPosts();
+		getFollowing();
 		unsubscribe = await pb.collection('posts').subscribe('*', async ({ action, record }) => {
 			if (action === 'create') {
 				const author = await pb.collection('users').getOne(record.author);
@@ -116,7 +158,11 @@
 				<p class="font-semibold text-sm hover:underline hover:cursor-pointer">See All</p>
 			</div>
 			{#each userList as user (user.id)}
-				<UserFollow name={user?.username} />
+				<UserFollow
+					name={user?.username}
+					onClick={() => window.location.assign(`http://${window.location.host}/user/${user.id}`)}
+					onFollow={() => followUser(user.id)}
+				/>
 			{/each}
 		</div>
 	</div>
@@ -139,15 +185,18 @@
 		<div class="">
 			<div class="flex justify-between items-center mb-4">
 				<h3 class="font-semibold text-neutral-300">Following</h3>
-				<img src="/dots.svg" alt="Dot Dot Dot" class="w-4 cursor-pointer" />
+				<img src="/dots.svg" alt="Dot Dot Dot" class="w-4 hover:cursor-pointer" />
 			</div>
+			{#each followList as follow (follow.id)}
+				<button
+					class="flex space-x-2 mb-4 hover:bg-neutral-700 p-2 rounded-md hover:cursor-pointer items-center w-full"
+					on:click={() => window.location.assign(`http://${window.location.host}/user/${follow.id}`)}
+				>
+					<img src="/profile.svg" alt="Dot Dot Dot" class="w-6 bg-white rounded-full" />
+					<p class="text-sm font-semibold">{follow.username}</p>
+				</button>
+			{/each}
 
-			<div
-				class="flex space-x-2 mb-4 hover:bg-neutral-700 p-2 rounded-md hover:cursor-pointer items-center"
-			>
-				<img src="/profile.svg" alt="Dot Dot Dot" class="w-6" />
-				<p class="text-sm font-semibold">Name</p>
-			</div>
 			<h3 class="font-semibold text-neutral-300 mb-4">Create Post</h3>
 			{#if creatingPost}
 				<div class="flex flex-col mb-2">

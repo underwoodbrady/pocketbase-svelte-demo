@@ -11,7 +11,7 @@
         try{
             loading = true;
             await pb.collection("users").authWithPassword(username, password);
-            window.location.replace(`http://${window.location.host}/home`);
+            window.location.assign(`http://${window.location.host}/home`);
             loading = false;
         }catch(err){
             console.error(err);

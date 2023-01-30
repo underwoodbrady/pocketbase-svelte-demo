@@ -44,7 +44,7 @@
 <div class="bg-[#333333] w-[500px] rounded-md drop-shadow-md text-white p-5">
 	<div class="flex items-center justify-between mb-2">
 		<div class="flex items-center">
-			<img src="/profile.svg" alt="Profile Icon" class="h-10 mr-3 hover:cursor-pointer" />
+			<img src="/profile.svg" alt="Profile Icon" class="h-10 mr-3 hover:cursor-pointer rounded-full bg-white" />
 			<div class="flex flex-col">
 				<h3 class="font-semibold hover:underline cursor-pointer">{author}</h3>
 				<h4 class="text-sm text-neutral-300">{date}</h4>

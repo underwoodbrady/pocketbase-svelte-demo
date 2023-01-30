@@ -49,7 +49,9 @@
 	class="fixed w-full bg-[#2E2E2E] text-white h-14 flex justify-between items-center px-6 drop-shadow-md z-20"
 >
 	{#if $currentUser}
-		<img src="/placeholder-logo.svg" alt="Placeholder logo" class="h-8" />
+		<button on:click={() => window.location.assign(`http://${window.location.host}/home`)}>
+			<img src="/placeholder-logo.svg" alt="Placeholder logo" class="h-8" />
+		</button>
 		<p class="text-neutral-500 text-sm text-center">
 			This is a mock social media site for testing purposes
 		</p>
@@ -73,7 +75,7 @@
 					<div
 						class="absolute -right-[2px] -bottom-[2px] border-[#2E2E2E] border-2 w-4 h-4 bg-neutral-700 rounded-full flex justify-center items-center group-hover:bg-neutral-600"
 					>
-						<img src="chevron.svg" alt="chevron down" class="w-2" />
+						<img src="/chevron.svg" alt="chevron down" class="w-2" />
 					</div>
 				</button>
 
@@ -106,12 +108,17 @@
 					</MediumDropdown>
 				{/if}
 				{#if showProfileDropdown}
-					<Dropdown username={$currentUser.username} onClick={(num) => dropDownClicked(num)} onEditProfile={() => window.location.assign(`http://${window.location.host}/user/${$currentUser?.id}`)} />
+					<Dropdown
+						username={$currentUser.username}
+						onClick={(num) => dropDownClicked(num)}
+						onEditProfile={() =>
+							window.location.assign(`http://${window.location.host}/user/${$currentUser?.id}`)}
+					/>
 				{/if}
 			</div>
 		</div>
 	{/if}
 </header>
-<main class="relative pt-14">
+<main>
 	<slot />
 </main>
