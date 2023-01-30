@@ -7,7 +7,5 @@
 		<h4 class="text-lg font-semibold">{label}</h4>
 		<img src="/dots.svg" alt="dot dot dot" class="w-4" />
 	</div>
-<slot>
-    
-</slot>
+	<slot />
 </div>

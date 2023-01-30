@@ -17,14 +17,14 @@
 			await pb.collection('users').getList(1, 5, {
 				sort: '-created'
 			})
-		).items;
+		).items.filter((u: any) => u.id !== $currentUser?.id);
 	}
 
 	async function getRecentPosts() {
 		postList = await (
 			await pb.collection('posts').getList(1, 50, {
 				sort: '-created',
-				expand: 'author'
+				expand: 'author,comments',
 			})
 		).items;
 	}
@@ -38,13 +38,13 @@
 			content: postText,
 			author: $currentUser.id,
 			tags: postTags,
-			date: date.toLocaleDateString('en-us'),
+			date: date.toLocaleDateString('en-us')
 		};
 
 		await pb.collection('posts').create(data);
 
-		postText = "";
-		postTags = "";
+		postText = '';
+		postTags = '';
 	}
 
 	async function likePost(id: string) {
@@ -59,6 +59,28 @@
 		};
 
 		await pb.collection('posts').update(id, data);
+	}
+
+	async function commentPost(id: string, comment: string) {
+		if ($currentUser == null) return;
+
+		let post = await pb.collection('posts').getOne(id);
+
+		let commentData = {
+			text: comment,
+			author: $currentUser.id,
+			username: $currentUser.username
+		}
+
+		let newComment = await pb.collection('comments').create(commentData); 
+
+		let comments = [...post.comments, newComment.id];
+
+		const updateData = {
+			comments: comments,
+		};
+
+		await pb.collection('posts').update(id, updateData);
 	}
 
 	let unsubscribe: () => void;
@@ -107,7 +129,9 @@
 				content={post?.content}
 				tags={post?.tags}
 				likes={post?.likes}
+				comments={post?.expand?.comments}
 				onLike={(id) => likePost(id)}
+				onComment={(id, comment) => commentPost(id, comment)}
 			/>
 		{/each}
 	</div>
