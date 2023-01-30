@@ -170,6 +170,7 @@
 		{#each postList as post (post.id)}
 			<Post
 				id={post.id}
+				authorId={post.expand?.author?.id}
 				author={post.expand?.author?.username}
 				date={post?.date}
 				content={post?.content}

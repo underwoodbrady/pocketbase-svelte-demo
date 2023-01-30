@@ -4,7 +4,8 @@
 	import Comment from '$lib/Comment.svelte';
 	import { onMount, beforeUpdate } from 'svelte';
 
-	export let id: string;
+	export let id: string; 
+	export let authorId: string; 
 	export let content: string;
 	export let tags: string;
 	export let author: string;
@@ -46,7 +47,7 @@
 		<div class="flex items-center">
 			<img src="/profile.svg" alt="Profile Icon" class="h-10 mr-3 hover:cursor-pointer rounded-full bg-white" />
 			<div class="flex flex-col">
-				<h3 class="font-semibold hover:underline cursor-pointer">{author}</h3>
+				<button class="font-semibold hover:underline cursor-pointer text-left" on:click={() => window.location.assign(`http://${window.location.host}/user/${authorId}`)}>{author}</button>
 				<h4 class="text-sm text-neutral-300">{date}</h4>
 			</div>
 		</div>
