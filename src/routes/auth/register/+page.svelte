@@ -27,6 +27,7 @@
                 password,
                 email,
                 passwordConfirm: password,
+                alerts: "Welcome to [placeholder]!",
             };
             loading = true;
             const createdUser = await pb.collection("users").create(data);

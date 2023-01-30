@@ -33,6 +33,16 @@
 	function dropDownClicked(dropdown: number) {
 		if (dropdown == 2) logout();
 	}
+
+	async function clearAlerts() {
+		if ($currentUser == null) return;
+
+		const data = {
+			alerts: ''
+		};
+
+		await pb.collection('users').update($currentUser.id, data);
+	}
 </script>
 
 <header
@@ -52,7 +62,7 @@
 			/>
 			<CircleIcon
 				icon="bell"
-				notifications={1}
+				notifications={$currentUser?.alerts ? 1 : 0}
 				onClick={() => {
 					toggleAlertDropdown();
 				}}
@@ -69,17 +79,25 @@
 
 				{#if showAlertDropdown}
 					<MediumDropdown label="Notifications">
-						<div class="flex items-center justify-between hover:bg-neutral-600 p-2 rounded-md select-none">
-							<div class="flex items-center space-x-2">
-								<div
-									class="w-9 h-9 rounded-full bg-maroon-400 flex justify-center items-center bg-emerald-500"
-								>
-									<img src="/confetti.svg" alt="kaboom" class="w-5" />
+						{#if $currentUser?.alerts}
+							<div
+								class="flex items-center justify-between hover:bg-neutral-600 p-2 rounded-md select-none"
+							>
+								<div class="flex items-center space-x-2">
+									<div
+										class="w-9 h-9 rounded-full bg-maroon-400 flex justify-center items-center bg-emerald-500"
+									>
+										<img src="/confetti.svg" alt="kaboom" class="w-5" />
+									</div>
+									<p class="text-sm font-semibold">{$currentUser?.alerts}</p>
 								</div>
-								<p class="text-sm font-semibold">Welcome to [placeholder]!</p>
+								<button on:click={clearAlerts}>
+									<img src="/close.svg" alt="close that" class="w-3 hover:cursor-pointer" />
+								</button>
 							</div>
-							<img src="/close.svg" alt="close that" class="w-3 hover:cursor-pointer" />
-						</div>
+						{:else}
+							<p class="text-center text-neutral-300 font-semibold mb-4">Nothing to see here...</p>
+						{/if}
 					</MediumDropdown>
 				{/if}
 				{#if showChatsDropdown}
