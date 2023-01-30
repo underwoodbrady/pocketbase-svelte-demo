@@ -1,5 +1,7 @@
 # Pocketbase SvelteKit Demo
 
+**Works best on desktop**
+
 This is a demo to show off the capabilities of Pocketbase and Sveltekit in a real time social media app.
 
 ## Run Project
