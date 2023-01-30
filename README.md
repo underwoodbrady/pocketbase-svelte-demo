@@ -11,7 +11,7 @@ npm run dev
 npm run dev -- --open
 ```
 
-In a separate terminal run
+To start the database, in a separate terminal run
 
 ```bash
 ./pocketbase serve
