@@ -2,20 +2,87 @@
 	import { currentUser, pb } from '../../pocketbase';
 	import Post from '$lib/Post.svelte';
 	import UserFollow from '$lib/UserFollow.svelte';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
+	import Dropdown from '$lib/Dropdown.svelte';
 
 	let creatingPost: boolean = true;
-	let postText: number;
-	let userList : any;
+	let postText: string;
+	let postTags: string;
+
+	let userList: any = [];
+	let postList: any = [];
 
 	async function getRecentUsers() {
-		userList = await (await pb.collection('users').getList(1,5, {
-			sort: '-created'
-		})).items;
+		userList = await (
+			await pb.collection('users').getList(1, 5, {
+				sort: '-created'
+			})
+		).items;
 	}
+
+	async function getRecentPosts() {
+		postList = await (
+			await pb.collection('posts').getList(1, 50, {
+				sort: '-created',
+				expand: 'author'
+			})
+		).items;
+	}
+
+	async function createPost() {
+		if ($currentUser == null) return;
+
+		let date = new Date();
+
+		const data = {
+			content: postText,
+			author: $currentUser.id,
+			tags: postTags,
+			date: date.toLocaleDateString('en-us'),
+		};
+
+		await pb.collection('posts').create(data);
+
+		postText = "";
+		postTags = "";
+	}
+
+	async function likePost(id: string) {
+		if ($currentUser == null) return;
+
+		let post = await pb.collection('posts').getOne(id);
+
+		let likes = [...post.likes, $currentUser.id];
+
+		const data = {
+			likes: likes
+		};
+
+		await pb.collection('posts').update(id, data);
+	}
+
+	let unsubscribe: () => void;
 
 	onMount(async () => {
 		getRecentUsers();
+		getRecentPosts();
+		unsubscribe = await pb.collection('posts').subscribe('*', async ({ action, record }) => {
+			if (action === 'create') {
+				const author = await pb.collection('users').getOne(record.author);
+				record.expand = { author };
+				postList = [record, ...postList];
+			}
+			if (action === 'delete') {
+				postList = postList.filter((m: any) => m.id !== record.id);
+			}
+			if (action === 'update') {
+				getRecentPosts();
+			}
+		});
+	});
+
+	onDestroy(() => {
+		unsubscribe?.();
 	});
 </script>
 
@@ -26,20 +93,23 @@
 				<p class="text-neutral-300">People you may know</p>
 				<p class="font-semibold text-sm hover:underline hover:cursor-pointer">See All</p>
 			</div>
-			{#if userList}
-			{#each userList as user}
-			<UserFollow name={user?.username}/>
+			{#each userList as user (user.id)}
+				<UserFollow name={user?.username} />
 			{/each}
-			{/if}
 		</div>
 	</div>
 	<div class="space-y-6 flex-1 mx-auto items-center flex flex-col">
-		<Post />
-		<Post />
-		<Post />
-		<Post />
-		<Post />
-		<Post />
+		{#each postList as post (post.id)}
+			<Post
+				id={post.id}
+				author={post.expand?.author?.username}
+				date={post?.date}
+				content={post?.content}
+				tags={post?.tags}
+				likes={post?.likes}
+				onLike={(id) => likePost(id)}
+			/>
+		{/each}
 	</div>
 	<div class="flex-1 text-white max-w-md">
 		<div class="">
@@ -48,7 +118,9 @@
 				<img src="/dots.svg" alt="Dot Dot Dot" class="w-4 cursor-pointer" />
 			</div>
 
-			<div class="flex space-x-2 mb-4 hover:bg-neutral-700 p-2 rounded-md hover:cursor-pointer items-center">
+			<div
+				class="flex space-x-2 mb-4 hover:bg-neutral-700 p-2 rounded-md hover:cursor-pointer items-center"
+			>
 				<img src="/profile.svg" alt="Dot Dot Dot" class="w-6" />
 				<p class="text-sm font-semibold">Name</p>
 			</div>
@@ -61,17 +133,20 @@
 						bind:value={postText}
 						class="bg-[#1b1b1b] p-2 rounded-[4px] mb-4"
 					/>
-					<label for="email" class="text-neutral-400 font-semibold mb-2 text-sm">Tags</label>
+					<label for="email" class="text-neutral-400 font-semibold mb-2 text-sm"
+						>Tags <span class="text-neutral-500">(separate by spaces)</span></label
+					>
 					<input
 						placeholder=""
 						type="text"
-						bind:value={postText}
+						bind:value={postTags}
 						class="bg-[#1b1b1b] p-2 rounded-[4px] mb-4"
 					/>
 				</div>
 			{/if}
 			<button
 				class="bg-[#378E8B] rounded-md p-2 font-semibold flex justify-center items-center w-full hover:bg-[#2d7e7b]"
+				on:click={createPost}
 			>
 				Create Post
 			</button>
