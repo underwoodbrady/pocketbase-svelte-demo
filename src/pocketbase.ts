@@ -2,7 +2,10 @@ import PocketBase from 'pocketbase';
 
 import { writable } from 'svelte/store';
 
-export const pb = new PocketBase("https://patient-tree-979.fly.dev");
+const devDatabase = "http://127.0.0.1:8090/";
+const prodDatabase = "https://patient-tree-979.fly.dev";
+
+export const pb = new PocketBase(devDatabase);
 
 export const currentUser = writable(pb.authStore.model);
 
