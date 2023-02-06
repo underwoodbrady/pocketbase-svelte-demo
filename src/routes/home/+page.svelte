@@ -30,6 +30,7 @@
 		).items;
 	}
 
+	//Might be able to remove
 	async function getFollowing() {
 		if ($currentUser == null) return;
 
@@ -53,7 +54,11 @@
 			date: date.toLocaleDateString('en-us')
 		};
 
-		await pb.collection('posts').create(data);
+		let newPost = await pb.collection('posts').create(data, {
+			expand: 'author'
+		});
+
+		postList = [newPost, ...postList];
 
 		postText = '';
 		postTags = '';
@@ -62,7 +67,7 @@
 	async function likePost(id: string) {
 		if ($currentUser == null) return;
 
-		let post = await pb.collection('posts').getOne(id);
+		let post = postList.filter((post:any)=> post.id == id)[0];
 
 		let likes = [...post.likes, $currentUser.id];
 
@@ -71,12 +76,17 @@
 		};
 
 		await pb.collection('posts').update(id, data);
+
+		postList = postList.map((posts: any) => {
+			if (posts.id == post.id) posts.likes = likes;
+			return posts;
+		});
 	}
 
 	async function commentPost(id: string, comment: string) {
 		if ($currentUser == null) return;
 
-		let post = await pb.collection('posts').getOne(id);
+		let post = postList.filter((post:any)=> post.id == id)[0];
 
 		let commentData = {
 			text: comment,
@@ -92,44 +102,55 @@
 			comments: comments
 		};
 
-		await pb.collection('posts').update(id, updateData);
+		let updatedPost = await pb.collection('posts').update(id, updateData, {
+			expand: 'author,comments'
+		});
+
+		postList = postList.map((posts: any) => {
+			if (posts.id == post.id) posts = updatedPost;
+			return posts;
+		});
 	}
 
 	async function followUser(id: string) {
 		//follow user
 		if ($currentUser == null) return;
 
-		let user = await pb.collection('users').getOne(id);
+		let user = userList.filter((user:any)=> user.id == id)[0];
 
 		if (followIds.includes(user.id)) return;
 
-		let following = [...followIds, user.id];
+		let following = [user.id, ...followIds];
 
 		const data = {
 			following: following
 		};
 
-		await pb.collection('users').update($currentUser.id, data);
+		let newUser = await pb.collection('users').update($currentUser.id, data, {
+			expand: 'following'
+		});
 
-		getFollowing();
-		
+		followIds = following;
+		followList = newUser.expand.following;
+
 		//other user receives follow (CURRENTLY NOT PROTECTED AT ALL, super dumb and not safe***)
 
-		let followers = [...user.followers, $currentUser.id]
+		let followers = [...user.followers, $currentUser.id];
 
 		const receiveData = {
 			followers: followers
-		}
+		};
 
-		await pb.collection('users').update(user.id, receiveData)
+		await pb.collection('users').update(user.id, receiveData);
 	}
 
-	let unsubscribe: () => void;
+	//let unsubscribe: () => void;
 
 	onMount(async () => {
 		getRecentUsers();
 		getRecentPosts();
 		getFollowing();
+		/* Might come back to later
 		unsubscribe = await pb.collection('posts').subscribe('*', async ({ action, record }) => {
 			if (action === 'create') {
 				const author = await pb.collection('users').getOne(record.author);
@@ -143,10 +164,11 @@
 				getRecentPosts();
 			}
 		});
+		*/
 	});
 
 	onDestroy(() => {
-		unsubscribe?.();
+		//unsubscribe?.();
 	});
 </script>
 
@@ -191,7 +213,8 @@
 			{#each followList as follow (follow.id)}
 				<button
 					class="flex space-x-2 mb-4 hover:bg-neutral-700 p-2 rounded-md hover:cursor-pointer items-center w-full"
-					on:click={() => window.location.assign(`http://${window.location.host}/user/${follow.id}`)}
+					on:click={() =>
+						window.location.assign(`http://${window.location.host}/user/${follow.id}`)}
 				>
 					<img src="/profile.svg" alt="Dot Dot Dot" class="w-6 bg-white rounded-full" />
 					<p class="text-sm font-semibold">{follow.username}</p>

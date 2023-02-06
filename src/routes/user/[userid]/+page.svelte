@@ -8,7 +8,9 @@
 	let showModal: boolean = false;
 
 	onMount(async () => {
-		getFollowing();
+		if (!$currentUser) return;
+		followIds = $currentUser.following;
+		followList = $currentUser.expand.following || [];
 		try {
 			viewedUser = await pb.collection('users').getOne($page.params.userid);
 		} catch (err) {
@@ -37,45 +39,35 @@
 
 	let followIds: any = [];
 	let followList: any = [];
-	
-	async function getFollowing() {
-		if ($currentUser == null) return;
-
-		let user = await pb.collection('users').getOne($currentUser.id, {
-			expand: 'following'
-		});
-
-		followIds = user.following;
-		followList = user.expand.following || [];
-	}
 
 	async function followUser(id: string) {
 		//follow user
 		if ($currentUser == null) return;
 
-		let user = await pb.collection('users').getOne(id);
+		if (followIds.includes(viewedUser.id)) return;
 
-		if (followIds.includes(user.id)) return;
-
-		let following = [...followIds, user.id];
+		let following = [viewedUser.id, ...followIds];
 
 		const data = {
 			following: following
 		};
 
-		await pb.collection('users').update($currentUser.id, data);
+		let newUser = await pb.collection('users').update($currentUser.id, data, {
+			expand: 'following'
+		});
 
-		getFollowing();
-		
+		followIds = following;
+		followList = newUser.expand.following;
+
 		//other user receives follow (CURRENTLY NOT PROTECTED AT ALL, super dumb and not safe***)
 
-		let followers = [...user.followers, $currentUser.id]
+		let followers = [...viewedUser.followers, $currentUser.id];
 
 		const receiveData = {
 			followers: followers
-		}
+		};
 
-		await pb.collection('users').update(user.id, receiveData)
+		await pb.collection('users').update(viewedUser.id, receiveData);
 	}
 </script>
 
@@ -124,7 +116,7 @@
 			{:else}
 				<button
 					class="flex space-x-2 items-center rounded-md bg-[#378E8B] hover:bg-[#2d7e7b] p-2 px-4"
-					on:click={()=>followUser(viewedUser?.id)}
+					on:click={() => followUser(viewedUser?.id)}
 				>
 					<img src="/follow.svg" alt="Edit Pen" class="w-5" />
 					<p class="text-neutral-300 font-semibold">Follow User</p></button
