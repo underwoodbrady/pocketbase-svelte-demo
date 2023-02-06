@@ -2,7 +2,7 @@
 	import { currentUser, pb } from '../../pocketbase';
 	import Post from '$lib/Post.svelte';
 	import UserFollow from '$lib/UserFollow.svelte';
-	import { beforeUpdate, onDestroy, onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 
 	let creatingPost: boolean = true;
 	let postText: string;
