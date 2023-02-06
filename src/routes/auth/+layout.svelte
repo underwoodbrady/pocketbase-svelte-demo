@@ -1,16 +1,16 @@
-<script>
+<script lang="ts">
 	import '../../app.css';
 	import { webVitals } from '$lib/vitals';
-	// @ts-ignore
-	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
+
+    export let path: string;
+	export let params: Record<string, string>;
+
 	let analyticsId = import.meta.env.VERCEL_ANALYTICS_ID;
-	$: if (analyticsId) {
-		webVitals({
-			path: $page.url.pathname,
-			params: $page.params,
-			analyticsId
-		});
-	}
+
+	onMount(() => {
+		if (analyticsId) webVitals({ path, params, analyticsId });
+	});
 </script>
 
 <main>
