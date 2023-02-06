@@ -1,5 +1,7 @@
 <script>
 	import '../../app.css';
+    import { webVitals } from '$lib/vitals';
+
 </script>
 
 <style>
