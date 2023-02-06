@@ -2,10 +2,9 @@
 	import '../../app.css';
 	import { webVitals } from '$lib/vitals';
 	// @ts-ignore
-	import { browser } from '$app/env';
 	import { page } from '$app/stores';
 	let analyticsId = import.meta.env.VERCEL_ANALYTICS_ID;
-	$: if (browser && analyticsId) {
+	$: if (analyticsId) {
 		webVitals({
 			path: $page.url.pathname,
 			params: $page.params,
