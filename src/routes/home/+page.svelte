@@ -114,6 +114,7 @@
 		let post = postList.filter((post: any) => post.id == id)[0];
 
 		let commentData = {
+			post: post.id,
 			text: comment,
 			author: $currentUser.id,
 			username: $currentUser.username
@@ -135,6 +136,12 @@
 			if (posts.id == post.id) posts = updatedPost;
 			return posts;
 		});
+	}
+
+	async function deletePost(id: string) {
+		postList = postList.filter((post: any) => post.id!==id);
+
+		await pb.collection('posts').delete(id);
 	}
 
 	async function followUser(id: string) {
@@ -227,6 +234,7 @@
 				onLike={(id) => likePost(id)}
 				onUnlike={(id) => unlikePost(id)}
 				onComment={(id, comment) => commentPost(id, comment)}
+				onDelete={(id) => deletePost(id)}
 			/>
 		{/each}
 	</div>
