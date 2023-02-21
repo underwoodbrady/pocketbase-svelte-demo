@@ -27,7 +27,6 @@
 
 	function togglePostDropdown() {
 		showPostDropdown = !showPostDropdown;
-		console.log("penis");
 	}
 
 	function onLikeClicked(id: string) {
