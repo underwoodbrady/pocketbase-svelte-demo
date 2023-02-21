@@ -67,7 +67,7 @@
 	async function likePost(id: string) {
 		if ($currentUser == null) return;
 
-		let post = postList.filter((post:any)=> post.id == id)[0];
+		let post = postList.filter((post: any) => post.id == id)[0];
 
 		let likes = [...post.likes, $currentUser.id];
 
@@ -75,18 +75,43 @@
 			likes: likes
 		};
 
+		postList = postList.map((posts: any) => {
+			if (posts.id == post.id) posts.likes = likes;
+			return posts;
+		});
+
 		await pb.collection('posts').update(id, data);
+	}
+
+	async function unlikePost(id: string) {
+		if ($currentUser == null) return;
+
+		let post = postList.filter((post: any) => post.id == id)[0];
+
+		let removalIndex = post.likes.indexOf($currentUser.id);
+
+		post.likes.splice(removalIndex, 1);
+
+		let likes = post.likes;
+
+		const data = {
+			likes: likes
+		};
+
+		console.log(post.likes, likes);
 
 		postList = postList.map((posts: any) => {
 			if (posts.id == post.id) posts.likes = likes;
 			return posts;
 		});
+
+		await pb.collection('posts').update(id, data);
 	}
 
 	async function commentPost(id: string, comment: string) {
 		if ($currentUser == null) return;
 
-		let post = postList.filter((post:any)=> post.id == id)[0];
+		let post = postList.filter((post: any) => post.id == id)[0];
 
 		let commentData = {
 			text: comment,
@@ -116,7 +141,7 @@
 		//follow user
 		if ($currentUser == null) return;
 
-		let user = userList.filter((user:any)=> user.id == id)[0];
+		let user = userList.filter((user: any) => user.id == id)[0];
 
 		if (followIds.includes(user.id)) return;
 
@@ -200,6 +225,7 @@
 				likes={post?.likes}
 				comments={post?.expand?.comments}
 				onLike={(id) => likePost(id)}
+				onUnlike={(id) => unlikePost(id)}
 				onComment={(id, comment) => commentPost(id, comment)}
 			/>
 		{/each}

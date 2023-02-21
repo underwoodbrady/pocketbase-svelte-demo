@@ -13,6 +13,7 @@
 	export let likes: string[] = [];
 	export let comments: any = [];
 	export let onLike: (id: string) => void;
+	export let onUnlike: (id: string) => void;
 	export let onComment: (id: string, comment: string) => void;
 
 	let commentText: string;
@@ -20,6 +21,13 @@
 
 	let tagArr: string[] = [];
 	let userLiked: boolean = false;
+
+	function onLikeClicked(id: string){
+		if(userLiked)
+			onUnlike(id);
+		else
+			onLike(id);
+	}
 
 	function createComment() {
 		onComment(id, commentText);
@@ -52,7 +60,7 @@
 			</div>
 		</div>
 		<div class="flex space-x-4">
-			<button on:click={() => onLike(id)}>
+			<button on:click={() => onLikeClicked(id)}>
 				{#if userLiked}<img
 						src="/heart-full.svg"
 						alt="Dot Dot Dot"
@@ -89,7 +97,7 @@
 	>
 		<button
 			class="flex space-x-2 items-center hover:bg-neutral-600 flex-1 p-1 rounded-md mx-1 justify-center"
-			on:click={() => onLike(id)}
+			on:click={() => onLikeClicked(id)}
 		>
 			{#if userLiked}<img
 					src="/heart-full.svg"
