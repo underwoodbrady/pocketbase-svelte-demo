@@ -77,7 +77,7 @@
 					<h4 class="text-sm text-neutral-300">{date}</h4>
 				</div>
 			</div>
-			<div class="flex space-x-4">
+			<div class="flex space-x-2">
 				<button on:click={() => onLikeClicked(id)}>
 					{#if userLiked}<img
 							src="/heart-full.svg"
@@ -89,7 +89,7 @@
 							class="w-4 hover:cursor-pointer"
 						/>{/if}</button
 				>
-				<button on:click={togglePostDropdown}>
+				<button on:click={togglePostDropdown} class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-neutral-600">
 					<img src="/dots.svg" alt="Dot Dot Dot" class="w-4 hover:cursor-pointer" />
 				</button>
 			</div>

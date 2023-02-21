@@ -3,7 +3,7 @@
 	export let onDelete: () => void;
 </script>
 
-<div class="bg-[#333333] rounded-md drop-shadow-md absolute w-64 right-6 top-14 p-2 z-20">
+<div class="bg-[#373737] rounded-md drop-shadow-md absolute w-64 right-6 top-14 p-2 z-20">
 	{#if showDelete}
 		<button on:click={onDelete} class="flex items-center hover:bg-neutral-600 p-2 rounded-md w-full">
 			<img src="/trash-can-red.svg" alt="dot dot dot" class="w-4 mr-3" />
