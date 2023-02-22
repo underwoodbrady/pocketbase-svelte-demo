@@ -3,6 +3,7 @@
 	import Tag from '$lib/Tag.svelte';
 	import Comment from '$lib/Comment.svelte';
 	import SmallDropdown from '$lib/SmallDropdown.svelte';
+	import HoverDropdown from '$lib/HoverDropdown.svelte';
 	import { onMount, beforeUpdate } from 'svelte';
 
 	export let id: string;
@@ -24,6 +25,7 @@
 	let tagArr: string[] = [];
 	let userLiked: boolean = false;
 	let showPostDropdown: boolean = false;
+	let showLikesDropdown: boolean = false;
 
 	function togglePostDropdown() {
 		showPostDropdown = !showPostDropdown;
@@ -57,9 +59,9 @@
 
 <div class="relative">
 	{#if showPostDropdown}
-		<SmallDropdown onDelete={()=>onDelete(id)} showDelete={$currentUser?.id === authorId} />
+		<SmallDropdown onDelete={() => onDelete(id)} showDelete={$currentUser?.id === authorId} />
 	{/if}
-	<div class="bg-[#333333] w-[500px] rounded-md drop-shadow-md text-white p-5">
+	<div class="bg-[#333333] 2xl:w-[600px] w-[500px] rounded-md drop-shadow-md text-white p-5">
 		<div class="flex items-center justify-between mb-2">
 			<div class="flex items-center">
 				<img
@@ -89,7 +91,10 @@
 							class="w-4 hover:cursor-pointer"
 						/>{/if}</button
 				>
-				<button on:click={togglePostDropdown} class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-neutral-600">
+				<button
+					on:click={togglePostDropdown}
+					class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-neutral-600"
+				>
 					<img src="/dots.svg" alt="Dot Dot Dot" class="w-4 hover:cursor-pointer" />
 				</button>
 			</div>
@@ -99,9 +104,20 @@
 			{content}
 		</p>
 
-		<div class="text-sm flex text-neutral-300 justify-between mb-4">
-			<p class="hover:underline cursor-pointer">{likes?.length} likes</p>
+		<div class="relative text-sm flex text-neutral-300 justify-between mb-4">
+			<p
+				class="hover:underline cursor-pointer"
+				on:pointerenter={() => (showLikesDropdown = true)}
+				on:pointerleave={() => (showLikesDropdown = false)}
+			>
+				{likes?.length} likes
+			</p>
 			<p class="hover:underline cursor-pointer">{comments?.length} comments</p>
+			{#if showLikesDropdown}
+			<HoverDropdown>
+				(call back to page and show load state while gathering most recent likes)
+			</HoverDropdown>
+			{/if}
 		</div>
 
 		{#if tagArr.length > 0}
