@@ -1,7 +1,9 @@
 <script lang="ts">
-	export let onSave: (text: string) => void;
+	export let onSave: (first: string, last:string, bio:string) => void;
 	export let onClose: () => void;
 
+	let firstName: string;
+	let lastName: string;
 	let bioText: string;
 </script>
 
@@ -18,11 +20,27 @@
 			/>
 		</button>
 		<div class="w-[500px] h-[1px] bg-neutral-700 mb-4 -ml-5" />
+		<p class="font-semibold mb-4 text-neutral-300">Name</p>
+		<div class="flex space-x-4">
+			<div class="flex flex-col flex-1">
+				<label for="firstName" class="text-neutral-400 font-semibold mb-2 text-sm">First</label>
+				<input class="bg-[#1b1b1b] p-2 rounded-[4px] mb-4" bind:value={firstName} maxlength="24" />
+			</div>
+			<div class="flex flex-col flex-1">
+				<label for="lastName" class="text-neutral-400 font-semibold mb-2 text-sm">Last</label>
+				<input class="bg-[#1b1b1b] p-2 rounded-[4px] mb-4" bind:value={lastName} maxlength="24" />
+			</div>
+		</div>
 		<p class="font-semibold mb-4 text-neutral-300">Bio</p>
-		<textarea class="bg-[#1b1b1b] p-2 rounded-[4px] mb-4" rows="4" bind:value={bioText} />
+		<textarea
+			class="bg-[#1b1b1b] p-2 rounded-[4px] mb-4"
+			rows="4"
+			bind:value={bioText}
+			maxlength="512"
+		/>
 		<button
 			class="rounded-md bg-[#378E8B] hover:bg-[#2d7e7b] p-2 px-4"
-			on:click={() => onSave(bioText)}>Save Changes</button
+			on:click={() => onSave(firstName || "", lastName || "", bioText || "")}>Save Changes</button
 		>
 	</div>
 </div>

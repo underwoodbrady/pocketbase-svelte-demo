@@ -16,7 +16,7 @@
 		<img src="/report.svg" alt="dot dot dot" class="w-4 mr-3" />
 		<div class="text-left">
 			<h4 class="text-white text-sm font-semibold">Report Post</h4>
-			<p class="text-neutral-500 text-xs">I'm concerned about this post</p>
+			<p class="text-neutral-500 text-xs">This post violates content policy</p>
 		</div>
 	</button>
 	<slot />
