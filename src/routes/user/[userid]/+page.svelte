@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { currentUser, pb } from '../../../pocketbase';
 	import { page } from '$app/stores';
-	import { onMount, beforeUpdate } from 'svelte';
+	import { beforeUpdate } from 'svelte';
 	import EditModal from '$lib/EditModal.svelte';
 
 	let viewedUser: any = '';
