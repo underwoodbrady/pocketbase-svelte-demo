@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { currentUser, pb } from '../../../pocketbase';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
+	import { onMount, beforeUpdate } from 'svelte';
 	import EditModal from '$lib/EditModal.svelte';
 
 	let viewedUser: any = '';
 	let showModal: boolean = false;
 
-	onMount(async () => {
+	beforeUpdate(async()=>{
 		if (!$currentUser) return;
 		followIds = $currentUser.following;
 		followList = $currentUser.expand.following || [];
@@ -16,14 +16,26 @@
 		} catch (err) {
 			console.error(err);
 		}
-	});
+	})
 
-	async function updateBio(text: string) {
+	function toCapitalize(string: string) {
+		return string.charAt(0).toLocaleUpperCase() + string.slice(1).toLocaleLowerCase();
+	}
+
+	async function updateProfile(first: string, last: string, bio: string) {
 		if ($currentUser == null) return;
 
-		const data = {
-			bio: text
+		type profileData = {
+			bio?: string;
+			name?: string;
 		};
+
+		let data: profileData = {};
+
+		if (bio) data.bio = bio;
+		if (first && last) data.name = `${toCapitalize(first)} ${toCapitalize(last)}`;
+
+		if (!data) return;
 
 		await pb.collection('users').update($currentUser.id, data);
 		closeModal();
@@ -74,7 +86,10 @@
 {#if viewedUser === ''}
 	<!--Load state-->
 {:else if viewedUser}
-	{#if showModal}<EditModal onSave={(text) => updateBio(text)} onClose={closeModal} />
+	{#if showModal}<EditModal
+			onSave={(first, last, bio) => updateProfile(first, last, bio)}
+			onClose={closeModal}
+		/>
 	{/if}
 	<div class="">
 		<div
@@ -86,9 +101,13 @@
 					alt="Profile Icon"
 					class="w-20 hover:cursor-pointer bg-white rounded-full"
 				/>
-				<div class="space-y-1">
-					<h1 class="font-semibold text-white text-2xl">{viewedUser?.username || ''}</h1>
-					<div class="text-[#49b4b1] text-sm font-semibold flex space-x-2">
+				<div>
+					<h1 class="font-semibold text-white text-2xl">{viewedUser?.username}</h1>
+					{#if viewedUser?.name}<h2 class=" text-neutral-300">
+							{viewedUser?.name}
+						</h2>
+					{/if}
+					<div class="text-[#49b4b1] text-sm font-semibold flex space-x-2 mt-1">
 						<h2 class="hover:underline cursor-pointer">
 							{viewedUser?.followers?.length} Followers
 						</h2>
