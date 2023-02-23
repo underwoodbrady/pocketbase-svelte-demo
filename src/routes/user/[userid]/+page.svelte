@@ -1,22 +1,30 @@
 <script lang="ts">
 	import { currentUser, pb } from '../../../pocketbase';
 	import { page } from '$app/stores';
-	import { beforeUpdate } from 'svelte';
+	import { onMount, beforeUpdate } from 'svelte';
 	import EditModal from '$lib/EditModal.svelte';
+	import SmallPost from '$lib/SmallPost.svelte';
 
 	let viewedUser: any = '';
 	let showModal: boolean = false;
+	let postList: any = [];
 
-	beforeUpdate(async()=>{
+	beforeUpdate(async () => {
 		if (!$currentUser) return;
 		followIds = $currentUser.following;
 		followList = $currentUser.expand.following || [];
+	});
+
+	onMount(async () => {
 		try {
-			viewedUser = await pb.collection('users').getOne($page.params.userid);
+			viewedUser = await pb.collection('users').getOne($page.params.userid, {
+				expand: 'posts'
+			});
 		} catch (err) {
 			console.error(err);
 		}
-	})
+		postList = viewedUser.expand.posts || [];
+	});
 
 	function toCapitalize(string: string) {
 		return string.charAt(0).toLocaleUpperCase() + string.slice(1).toLocaleLowerCase();
@@ -81,6 +89,54 @@
 
 		await pb.collection('users').update(viewedUser.id, receiveData);
 	}
+
+	async function deletePost(id: string) {
+		postList = postList.filter((post: any) => post.id !== id);
+
+		await pb.collection('posts').delete(id);
+	}
+
+	async function likePost(id: string) {
+		if ($currentUser == null) return;
+
+		let post = postList.filter((post: any) => post.id == id)[0];
+
+		let likes = [...post.likes, $currentUser.id];
+
+		const data = {
+			likes: likes
+		};
+
+		postList = postList.map((posts: any) => {
+			if (posts.id == post.id) posts.likes = likes;
+			return posts;
+		});
+
+		await pb.collection('posts').update(id, data);
+	}
+
+	async function unlikePost(id: string) {
+		if ($currentUser == null) return;
+
+		let post = postList.filter((post: any) => post.id == id)[0];
+
+		let removalIndex = post.likes.indexOf($currentUser.id);
+
+		post.likes.splice(removalIndex, 1);
+
+		let likes = post.likes;
+
+		const data = {
+			likes: likes
+		};
+
+		postList = postList.map((posts: any) => {
+			if (posts.id == post.id) posts.likes = likes;
+			return posts;
+		});
+
+		await pb.collection('posts').update(id, data);
+	}
 </script>
 
 {#if viewedUser === ''}
@@ -102,7 +158,11 @@
 					class="w-20 hover:cursor-pointer bg-white rounded-full"
 				/>
 				<div>
-					<h1 class="font-semibold text-white text-2xl">{viewedUser?.username}</h1>
+					<div class="flex space-x-1 items-center">
+						<h1 class="font-semibold text-white text-2xl">{viewedUser?.username}</h1>
+						{#if viewedUser?.verified}<img src="/verified.svg" alt="Verified" class="w-5" />
+						{/if}
+					</div>
 					{#if viewedUser?.name}<h2 class=" text-neutral-300">
 							{viewedUser?.name}
 						</h2>
@@ -142,12 +202,35 @@
 				>
 			{/if}
 		</div>
-		<div class="px-16">
+		<div class="px-16 mb-4">
 			<h3 class="text-white text-lg font-semibold mb-2">Bio:</h3>
 			{#if $currentUser?.id == viewedUser?.id}
 				<p class="text-neutral-300">{$currentUser?.bio || 'Nothing to see here yet'}</p>
 			{:else}
 				<p class="text-neutral-300">{viewedUser?.bio || 'Nothing to see here yet'}</p>
+			{/if}
+		</div>
+		<div class="px-16">
+			<h3 class="text-white text-lg font-semibold mb-4">Posts:</h3>
+			{#if postList.length >= 1}
+				<div class="flex flex-wrap gap-12">
+					{#each postList || [] as post (post.id)}
+						<SmallPost
+							id={post.id}
+							authorId={viewedUser.id}
+							author={viewedUser.username}
+							date={post?.date}
+							content={post?.content}
+							tags={post?.tags}
+							likes={post?.likes}
+							onLike={(id) => likePost(id)}
+							onUnlike={(id) => unlikePost(id)}
+							onDelete={(id) => deletePost(id)}
+						/>
+					{/each}
+				</div>
+			{:else}
+				<p class="text-neutral-300">Nothing to see here yet</p>
 			{/if}
 		</div>
 	</div>

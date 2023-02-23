@@ -61,6 +61,12 @@
 			expand: 'author'
 		});
 
+		const userData = {
+			'posts+': newPost.id
+		};
+
+		await pb.collection('users').update($currentUser.id, userData);
+
 		postList = [newPost, ...postList];
 
 		postText = '';
@@ -100,8 +106,6 @@
 		const data = {
 			likes: likes
 		};
-
-		console.log(post.likes, likes);
 
 		postList = postList.map((posts: any) => {
 			if (posts.id == post.id) posts.likes = likes;
@@ -229,6 +233,9 @@
 				onDelete={(id) => deletePost(id)}
 			/>
 		{/each}
+		{#if (postFollowing && postListFollowing.length<1) || (!postFollowing && postList.length<1)}
+		<p class="text-neutral-500 pt-4">Nothing to see here yet</p>
+		{/if}
 	</div>
 	<div class="flex-1 text-white max-w-md">
 		<div class="">
