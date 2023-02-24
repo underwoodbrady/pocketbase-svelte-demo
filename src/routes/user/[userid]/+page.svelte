@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { currentUser, pb } from '../../../pocketbase';
+	import { currentUser, pb, getImageURL } from '../../../pocketbase';
 	import { page } from '$app/stores';
 	import { onMount, beforeUpdate } from 'svelte';
 	import EditModal from '$lib/EditModal.svelte';
@@ -30,23 +30,19 @@
 		return string.charAt(0).toLocaleUpperCase() + string.slice(1).toLocaleLowerCase();
 	}
 
-	async function updateProfile(first: string, last: string, bio: string) {
+	async function updateProfile(first: string, last: string, bio: string, photo: any) {
 		if ($currentUser == null) return;
 
-		type profileData = {
-			bio?: string;
-			name?: string;
-		};
+		const formData = new FormData();
 
-		let data: profileData = {};
+		if (bio) formData.append('bio', bio);
+		if (first && last) formData.append('name', `${toCapitalize(first)} ${toCapitalize(last)}`);
+		if (photo) formData.append('avatar', photo);
 
-		if (bio) data.bio = bio;
-		if (first && last) data.name = `${toCapitalize(first)} ${toCapitalize(last)}`;
+		if (!formData) return;
 
-		if (!data) return;
-
-		await pb.collection('users').update($currentUser.id, data);
 		closeModal();
+		await pb.collection('users').update($currentUser.id, formData);
 	}
 
 	function closeModal() {
@@ -143,7 +139,12 @@
 	<!--Load state-->
 {:else if viewedUser}
 	{#if showModal}<EditModal
-			onSave={(first, last, bio) => updateProfile(first, last, bio)}
+			currentAvatar={$currentUser?.avatar ? getImageURL(
+				$currentUser?.collectionId,
+				$currentUser?.id || '',
+				$currentUser?.avatar
+			) : '/profile.svg'}
+			onSave={(first, last, bio, photo) => updateProfile(first, last, bio, photo)}
 			onClose={closeModal}
 		/>
 	{/if}
@@ -152,18 +153,36 @@
 			class="px-16 pt-24 pb-8 mb-4 bg-[#2e2e2e] flex justify-between items-center drop-shadow-sm"
 		>
 			<div class="flex space-x-6 items-center ">
-				<img
-					src="/profile.svg"
-					alt="Profile Icon"
-					class="w-20 hover:cursor-pointer bg-white rounded-full"
-				/>
+				{#if viewedUser?.avatar}
+					<img
+						src={getImageURL(
+							viewedUser?.collectionId,
+							viewedUser?.id || '',
+							viewedUser?.avatar
+						) || "/profile.svg"}
+						alt="Profile Icon"
+						class="w-20 h-20 object-cover hover:cursor-pointer bg-white rounded-full"
+					/>
+				{:else}
+					<img
+						src="/profile.svg"
+						alt="Profile Icon"
+						class="w-20 hover:cursor-pointer bg-white rounded-full"
+					/>
+				{/if}
+
 				<div>
 					<div class="flex space-x-1 items-center">
 						<h1 class="font-semibold text-white text-2xl">{viewedUser?.username}</h1>
 						{#if viewedUser?.verified}<img src="/verified.svg" alt="Verified" class="w-5" />
 						{/if}
 					</div>
-					{#if viewedUser?.name}<h2 class=" text-neutral-300">
+					{#if $currentUser?.id == viewedUser?.id}
+						<h2 class=" text-neutral-300">
+							{$currentUser?.name}
+						</h2>
+					{:else if viewedUser?.name}
+						<h2 class=" text-neutral-300">
 							{viewedUser?.name}
 						</h2>
 					{/if}

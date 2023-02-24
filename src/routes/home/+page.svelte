@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { currentUser, pb } from '../../pocketbase';
+	import { currentUser, getImageURL, pb } from '../../pocketbase';
 	import Post from '$lib/Post.svelte';
 	import UserFollow from '$lib/UserFollow.svelte';
 	import BigToggle from '$lib/BigToggle.svelte';
@@ -221,6 +221,11 @@
 			<Post
 				id={post.id}
 				authorId={post.expand?.author?.id}
+				authorAvatar={post.expand?.author?.avatar ? getImageURL(
+					post.expand?.author?.collectionId,
+					post.expand?.author?.id || '',
+					post.expand?.author?.avatar
+				) : '/profile.svg'}
 				author={post.expand?.author?.username}
 				date={post?.date}
 				content={post?.content}
