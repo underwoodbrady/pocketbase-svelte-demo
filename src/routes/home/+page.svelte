@@ -44,7 +44,6 @@
 
 		followIds = user.following;
 		followList = user.expand.following || [];
-		recommendedList = userList.filter((u:any)=>!followIds.includes(u.id));
 	}
 
 	async function createPost() {
@@ -189,6 +188,10 @@
 		postListFollowing = postList.filter((p:any)=> followIds.includes(p.author))
 	}
 
+	function getRecommendedList(){
+		recommendedList = userList.filter((u:any)=>!followIds.includes(u.id));
+	}
+
 	onMount(async () => {
 		getRecentUsers();
 		getFollowing();
@@ -197,6 +200,7 @@
 
 	afterUpdate(()=>{
 		getPostListFollowing();
+		getRecommendedList();
 	});
 
 </script>
