@@ -23,8 +23,6 @@
 				sort: '-created'
 			})
 		).items.filter((u: any) => u.id !== $currentUser?.id);
-
-		recommendedList = userList.filter((u:any)=>!followIds.includes(u.id));
 	}
 
 	async function getRecentPosts() {
@@ -46,6 +44,7 @@
 
 		followIds = user.following;
 		followList = user.expand.following || [];
+		recommendedList = userList.filter((u:any)=>!followIds.includes(u.id));
 	}
 
 	async function createPost() {
