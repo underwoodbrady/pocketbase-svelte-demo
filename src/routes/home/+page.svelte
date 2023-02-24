@@ -209,6 +209,11 @@
 			{#each userList as user (user.id)}
 				<UserFollow
 					name={user?.username}
+					avatar={user?.avatar ? getImageURL(
+						user?.collectionId,
+						user?.id || '',
+						user?.avatar
+					) : '/profile.svg'}
 					onClick={() => window.location.assign(`http://${window.location.host}/user/${user.id}`)}
 					onFollow={() => followUser(user.id)}
 				/>
@@ -254,7 +259,11 @@
 					on:click={() =>
 						window.location.assign(`http://${window.location.host}/user/${follow.id}`)}
 				>
-					<img src="/profile.svg" alt="Dot Dot Dot" class="w-6 bg-white rounded-full" />
+					<img src={follow?.avatar ? getImageURL(
+						follow?.collectionId,
+						follow?.id || '',
+						follow?.avatar
+					) : '/profile.svg'} alt="Dot Dot Dot" class="w-6 bg-white rounded-full" />
 					<p class="text-sm font-semibold">{follow.username}</p>
 				</button>
 			{/each}

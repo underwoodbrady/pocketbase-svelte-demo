@@ -237,6 +237,11 @@
 						<SmallPost
 							id={post.id}
 							authorId={viewedUser.id}
+							authorAvatar={getImageURL(
+								viewedUser?.collectionId,
+								viewedUser?.id || '',
+								viewedUser?.avatar
+							) || "/profile.svg"}
 							author={viewedUser.username}
 							date={post?.date}
 							content={post?.content}

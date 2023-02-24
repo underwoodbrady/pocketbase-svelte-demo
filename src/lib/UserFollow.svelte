@@ -1,5 +1,6 @@
 <script lang="ts">
 	export let name:string;
+    export let avatar:any;
     export let onClick: () => void;
     export let onFollow: () => void;
 </script>
@@ -8,7 +9,7 @@
 class="flex justify-between mb-2 items-center hover:bg-neutral-700 p-2 rounded-md hover:cursor-pointer"
 >
 <button class="flex items-center space-x-2" on:click={onClick}>
-    <img src="/profile.svg" alt="profile Icon" class="rounded-full bg-white" />
+    <img src={avatar} alt="profile Icon" class="w-8 h-8 object-cover rounded-full bg-white" />
     <p>{name}</p>
 </button>
 <button on:click={onFollow}>

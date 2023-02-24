@@ -7,6 +7,7 @@
 
 	export let id: string;
 	export let authorId: string;
+	export let authorAvatar: any;
 	export let content: string;
 	export let tags: string;
 	export let author: string;
@@ -49,9 +50,9 @@
 		<div class="flex items-center justify-between mb-2">
 			<div class="flex items-center">
 				<img
-					src="/profile.svg"
+					src={authorAvatar}
 					alt="Profile Icon"
-					class="h-10 mr-3 hover:cursor-pointer rounded-full bg-white"
+					class="h-10 w-10 object-cover mr-3 hover:cursor-pointer rounded-full bg-white"
 				/>
 				<div class="flex flex-col">
 					<button
