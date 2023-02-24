@@ -1,15 +1,19 @@
 <script lang="ts">
-	import { currentUser, pb } from '../../pocketbase';
+	import { currentUser, getImageURL, pb } from '../../pocketbase';
 	import Post from '$lib/Post.svelte';
 	import UserFollow from '$lib/UserFollow.svelte';
-	import { onDestroy, onMount } from 'svelte';
+	import BigToggle from '$lib/BigToggle.svelte';
+	import { onMount, afterUpdate } from 'svelte';
 
 	let creatingPost: boolean = true;
+	let postFollowing: boolean = false;
 	let postText: string;
 	let postTags: string;
 
 	let userList: any = [];
+	let recommendedList: any = [];
 	let postList: any = [];
+	let postListFollowing:any = [];
 	let followIds: any = [];
 	let followList: any = [];
 
@@ -40,6 +44,7 @@
 
 		followIds = user.following;
 		followList = user.expand.following || [];
+		recommendedList = userList.filter((u:any)=>!followIds.includes(u.id));
 	}
 
 	async function createPost() {
@@ -57,6 +62,12 @@
 		let newPost = await pb.collection('posts').create(data, {
 			expand: 'author'
 		});
+
+		const userData = {
+			'posts+': newPost.id
+		};
+
+		await pb.collection('users').update($currentUser.id, userData);
 
 		postList = [newPost, ...postList];
 
@@ -97,8 +108,6 @@
 		const data = {
 			likes: likes
 		};
-
-		console.log(post.likes, likes);
 
 		postList = postList.map((posts: any) => {
 			if (posts.id == post.id) posts.likes = likes;
@@ -176,32 +185,20 @@
 		await pb.collection('users').update(user.id, receiveData);
 	}
 
-	//let unsubscribe: () => void;
+	function getPostListFollowing(){
+		postListFollowing = postList.filter((p:any)=> followIds.includes(p.author))
+	}
 
 	onMount(async () => {
 		getRecentUsers();
-		getRecentPosts();
 		getFollowing();
-		/* Might come back to later
-		unsubscribe = await pb.collection('posts').subscribe('*', async ({ action, record }) => {
-			if (action === 'create') {
-				const author = await pb.collection('users').getOne(record.author);
-				record.expand = { author };
-				postList = [record, ...postList];
-			}
-			if (action === 'delete') {
-				postList = postList.filter((m: any) => m.id !== record.id);
-			}
-			if (action === 'update') {
-				getRecentPosts();
-			}
-		});
-		*/
+		getRecentPosts();
 	});
 
-	onDestroy(() => {
-		//unsubscribe?.();
+	afterUpdate(()=>{
+		getPostListFollowing();
 	});
+
 </script>
 
 <div class="flex justify-between mt-8 space-x-8 px-8 w-full">
@@ -211,9 +208,14 @@
 				<p class="text-neutral-300">People you may know</p>
 				<p class="font-semibold text-sm hover:underline hover:cursor-pointer">See All</p>
 			</div>
-			{#each userList as user (user.id)}
+			{#each recommendedList as user (user.id)}
 				<UserFollow
 					name={user?.username}
+					avatar={user?.avatar ? getImageURL(
+						user?.collectionId,
+						user?.id || '',
+						user?.avatar
+					) : '/profile.svg'}
 					onClick={() => window.location.assign(`http://${window.location.host}/user/${user.id}`)}
 					onFollow={() => followUser(user.id)}
 				/>
@@ -221,10 +223,16 @@
 		</div>
 	</div>
 	<div class="space-y-6 flex-1 mx-auto items-center flex flex-col">
-		{#each postList as post (post.id)}
+		<BigToggle toggleChanged={(state)=>{postFollowing=state}}/>
+		{#each (postFollowing ? postListFollowing : postList) as post (post.id)}
 			<Post
 				id={post.id}
 				authorId={post.expand?.author?.id}
+				authorAvatar={post.expand?.author?.avatar ? getImageURL(
+					post.expand?.author?.collectionId,
+					post.expand?.author?.id || '',
+					post.expand?.author?.avatar
+				) : '/profile.svg'}
 				author={post.expand?.author?.username}
 				date={post?.date}
 				content={post?.content}
@@ -237,6 +245,9 @@
 				onDelete={(id) => deletePost(id)}
 			/>
 		{/each}
+		{#if (postFollowing && postListFollowing.length<1) || (!postFollowing && postList.length<1)}
+		<p class="text-neutral-500 pt-4">Nothing to see here yet</p>
+		{/if}
 	</div>
 	<div class="flex-1 text-white max-w-md">
 		<div class="">
@@ -250,7 +261,11 @@
 					on:click={() =>
 						window.location.assign(`http://${window.location.host}/user/${follow.id}`)}
 				>
-					<img src="/profile.svg" alt="Dot Dot Dot" class="w-6 bg-white rounded-full" />
+					<img src={follow?.avatar ? getImageURL(
+						follow?.collectionId,
+						follow?.id || '',
+						follow?.avatar
+					) : '/profile.svg'} alt="Dot Dot Dot" class="w-6 bg-white rounded-full" />
 					<p class="text-sm font-semibold">{follow.username}</p>
 				</button>
 			{/each}

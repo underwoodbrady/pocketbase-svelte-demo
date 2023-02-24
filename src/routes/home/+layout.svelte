@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '../../app.css';
-	import { currentUser, pb } from '../../pocketbase';
+	import { currentUser, pb, getImageURL } from '../../pocketbase';
 	import CircleIcon from '$lib/CircleIcon.svelte';
 	import Dropdown from '$lib/Dropdown.svelte';
 	import MediumDropdown from '$lib/MediumDropdown.svelte';
@@ -51,7 +51,7 @@
 	{#if $currentUser}
 		<img src="/placeholder-logo.svg" alt="Placeholder logo" class="h-8" />
 		<p class="text-neutral-500 text-sm text-center">
-			This is a mock social media site for testing purposes
+			This is a mock social media site for testing
 		</p>
 		<div class="relative flex space-x-3 items-center group">
 			<CircleIcon
@@ -69,7 +69,11 @@
 			/>
 			<div class="relative group">
 				<button on:click={toggleProfileDropdown}>
-					<img src="/profile.svg" alt="Default profile" class="h-10 bg-white rounded-full" />
+					<img src={$currentUser?.avatar ? getImageURL(
+						$currentUser?.collectionId,
+						$currentUser?.id || '',
+						$currentUser?.avatar
+					) : "/profile.svg"} alt="Default profile" class="h-10 w-10 object-cover bg-white rounded-full" />
 					<div
 						class="absolute -right-[2px] -bottom-[2px] border-[#2E2E2E] border-2 w-4 h-4 bg-neutral-700 rounded-full flex justify-center items-center group-hover:bg-neutral-600"
 					>
@@ -106,12 +110,24 @@
 					</MediumDropdown>
 				{/if}
 				{#if showProfileDropdown}
-					<Dropdown username={$currentUser.username} onClick={(num) => dropDownClicked(num)} onEditProfile={() => window.location.assign(`http://${window.location.host}/user/${$currentUser?.id}`)} />
+					<Dropdown
+						username={$currentUser.username}
+						avatar={$currentUser?.avatar ? getImageURL(
+							$currentUser?.collectionId,
+							$currentUser?.id || '',
+							$currentUser?.avatar
+						) : '/profile.svg'}
+						onClick={(num) => dropDownClicked(num)}
+						onEditProfile={() =>
+							window.location.assign(`http://${window.location.host}/user/${$currentUser?.id}`)}
+					/>
 				{/if}
 			</div>
 		</div>
 	{/if}
 </header>
 <main class="relative pt-14">
-	<slot />
+	{#if $currentUser}
+		<slot />
+	{/if}
 </main>
