@@ -11,6 +11,7 @@
 	let postTags: string;
 
 	let userList: any = [];
+	let recommendedList: any = [];
 	let postList: any = [];
 	let postListFollowing:any = [];
 	let followIds: any = [];
@@ -22,6 +23,8 @@
 				sort: '-created'
 			})
 		).items.filter((u: any) => u.id !== $currentUser?.id);
+
+		recommendedList = userList.filter((u:any)=>!followIds.includes(u.id));
 	}
 
 	async function getRecentPosts() {
@@ -206,7 +209,7 @@
 				<p class="text-neutral-300">People you may know</p>
 				<p class="font-semibold text-sm hover:underline hover:cursor-pointer">See All</p>
 			</div>
-			{#each userList as user (user.id)}
+			{#each recommendedList as user (user.id)}
 				<UserFollow
 					name={user?.username}
 					avatar={user?.avatar ? getImageURL(

@@ -237,11 +237,11 @@
 						<SmallPost
 							id={post.id}
 							authorId={viewedUser.id}
-							authorAvatar={getImageURL(
+							authorAvatar={viewedUser?.avatar ? getImageURL(
 								viewedUser?.collectionId,
 								viewedUser?.id || '',
 								viewedUser?.avatar
-							) || "/profile.svg"}
+							) : "/profile.svg"}
 							author={viewedUser.username}
 							date={post?.date}
 							content={post?.content}
