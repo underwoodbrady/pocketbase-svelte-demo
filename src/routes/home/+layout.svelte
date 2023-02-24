@@ -51,7 +51,7 @@
 	{#if $currentUser}
 		<img src="/placeholder-logo.svg" alt="Placeholder logo" class="h-8" />
 		<p class="text-neutral-500 text-sm text-center">
-			This is a mock social media site for testing purposes
+			This is a mock social media site for testing
 		</p>
 		<div class="relative flex space-x-3 items-center group">
 			<CircleIcon
