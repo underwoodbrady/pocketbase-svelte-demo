@@ -39,6 +39,7 @@
 
 	function createComment() {
 		onComment(id, commentText);
+		console.log(comments);
 		commentText = '';
 	}
 
@@ -158,7 +159,7 @@
 		</div>
 
 		<div class="flex flex-col mb-4 space-y-2">
-			{#each comments as comment}
+			{#each comments as comment (comment.id)}
 				<Comment author={comment.username} text={comment.text} authorAvatar={authorAvatar}/>
 			{/each}
 		</div>
