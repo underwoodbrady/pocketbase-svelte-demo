@@ -39,7 +39,6 @@
 
 	function createComment() {
 		onComment(id, commentText);
-		console.log(comments);
 		commentText = '';
 	}
 
