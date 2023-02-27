@@ -4,6 +4,8 @@
 
 This is a demo to show off the capabilities of Pocketbase and Sveltekit in a real time social media app.
 
+![Profile Page](https://i.imgur.com/KzwpVDE.png)
+
 ## Run Project
 
 Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
