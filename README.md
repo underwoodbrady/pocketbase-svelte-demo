@@ -2,7 +2,7 @@
 
 **Works best on desktop**
 
-This is a demo to show off the capabilities of Pocketbase and Sveltekit in a real time social media app.
+This is a [demo](https://pocket.montana.icu/auth/register) to show off the capabilities of Pocketbase and Sveltekit in a real time social media app.
 
 ![Profile Page](https://i.imgur.com/KzwpVDE.png)
 
