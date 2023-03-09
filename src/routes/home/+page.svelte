@@ -196,6 +196,8 @@
 		getRecentUsers();
 		getFollowing();
 		getRecentPosts();
+		if(!$currentUser?.verified)
+			await pb.collection("users").requestVerification($currentUser?.email);
 	});
 
 	afterUpdate(()=>{

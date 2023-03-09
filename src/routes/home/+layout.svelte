@@ -4,10 +4,12 @@
 	import CircleIcon from '$lib/CircleIcon.svelte';
 	import Dropdown from '$lib/Dropdown.svelte';
 	import MediumDropdown from '$lib/MediumDropdown.svelte';
+	import ErrorMessage from '$lib/ErrorMessage.svelte';
 
 	let showProfileDropdown: boolean = false;
 	let showAlertDropdown: boolean = false;
 	let showChatsDropdown: boolean = false;
+	let showError: boolean = false;
 
 	function toggleProfileDropdown() {
 		showAlertDropdown = false;
@@ -23,6 +25,7 @@
 		showProfileDropdown = false;
 		showAlertDropdown = false;
 		showChatsDropdown = !showChatsDropdown;
+		createError();
 	}
 
 	function logout() {
@@ -42,6 +45,17 @@
 		};
 
 		await pb.collection('users').update($currentUser.id, data);
+	}
+	let openError: ReturnType<typeof setTimeout>, closeError: ReturnType<typeof setTimeout>;
+	function createError(){
+		clearTimeout(openError)
+		clearTimeout(closeError);
+		openError = setTimeout(()=>{
+			showError=true;
+			closeError = setTimeout(()=>{
+				showError=false;
+			},5000)
+		},200)
 	}
 </script>
 
@@ -130,4 +144,7 @@
 	{#if $currentUser}
 		<slot />
 	{/if}
+	<div class="fixed left-1/2 -translate-x-1/2 bottom-6">
+		<ErrorMessage label="This is an error message" type="error" onClick={()=>{showError=false}} shown={showError}/>
+	</div>
 </main>
